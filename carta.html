@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Naara - Mi Carta</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,600&display=swap');
+
+        body {
+            margin: 0; padding: 0;
+            background-color: #0b132b; 
+            color: #e0e1dd;
+            font-family: 'Playfair Display', serif;
+            min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; overflow: hidden;
+        }
+
+        /* Fondo de estrellas */
+        .particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+        .header {
+            text-align: center;
+            z-index: 10;
+            margin-bottom: 80px; /* Espacio para que la carta suba */
+            animation: fadeIn 2s ease forwards;
+        }
+
+        .header h1 {
+            font-size: 2.5rem; margin: 0; letter-spacing: 2px;
+            cursor: help; /* Gatillo Easter Egg */
+        }
+
+        .header p {
+            font-style: italic; color: #f4d06f; font-size: 1.2rem;
+        }
+
+        /* Contenedor principal del sobre */
+        .envelope-wrapper {
+            position: relative;
+            width: 320px;
+            height: 200px;
+            z-index: 10;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Parte trasera del sobre (bolsillo) */
+        .envelope-back {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 100px 160px 100px 160px;
+            border-color: transparent #1a2a5c #111d42 #1a2a5c; /* Tonos azules que combinan */
+            z-index: 4;
+            pointer-events: none;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        /* La carta (papel) */
+        .letter {
+            position: absolute;
+            bottom: 0; left: 10px; right: 10px;
+            background-color: #fdf5e6; /* Color crema tipo papel antiguo */
+            color: #333;
+            padding: 25px 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            z-index: 3;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s; /* Se desliza después de que abre la solapa */
+        }
+
+        .letter p {
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .letter .signature {
+            display: block;
+            margin-top: 15px;
+            font-style: italic;
+            font-weight: bold;
+            color: #0b132b;
+            text-align: right;
+        }
+
+        /* Solapa superior del sobre */
+        .flap {
+            position: absolute;
+            top: 0; left: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 120px 160px 0 160px;
+            border-color: #223570 transparent transparent transparent;
+            z-index: 5;
+            transform-origin: top center;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Sello tipo cera */
+        .wax-seal {
+            position: absolute;
+            top: 100px; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 40px;
+            background-color: #ff4d4d;
+            border-radius: 50%;
+            z-index: 6;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3), 0 5px 10px rgba(0,0,0,0.4);
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.2s ease;
+        }
+
+        .wax-seal::after {
+            content: "N"; /* La inicial de ella */
+            color: #fff;
+            font-size: 1.2rem;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* CLASES PARA ANIMAR (Se agregan con JS al hacer clic) */
+        .envelope-wrapper.open .flap {
+            transform: rotateX(180deg);
+            z-index: 2; /* Se va para atrás */
+        }
+
+        .envelope-wrapper.open .wax-seal {
+            opacity: 0; /* El sello desaparece al abrir */
+        }
+
+        .envelope-wrapper.open .letter {
+            transform: translateY(-130px); /* La carta sube */
+            z-index: 5; /* Pasa por encima del bolsillo para que se pueda leer completa */
+        }
+
+        /* Instrucción abajo del sobre */
+        .instruction {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #70a9a1;
+            animation: pulse 2s infinite;
+        }
+
+        /* Botón de Regresar */
+        .back-btn {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 10px 25px; background: rgba(224, 225, 221, 0.1); border: 1px solid #e0e1dd;
+            color: #e0e1dd; border-radius: 20px; text-decoration: none; font-family: 'Arial', sans-serif;
+            text-transform: uppercase; letter-spacing: 1px; z-index: 30; transition: all 0.3s ease; font-size: 0.8rem;
+        }
+        .back-btn:hover { background: #e0e1dd; color: #0b132b; }
+
+        /* --- ESTILOS DEL EASTER EGG --- */
+        .easter-egg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 5, 20, 0.98); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .easter-egg-overlay.active { opacity: 1; pointer-events: all; }
+        .easter-egg-content { text-align: center; max-width: 80%; position: relative; background: rgba(11, 19, 43, 0.6); padding: 30px; border-radius: 20px; border: 2px solid #00c3ff; box-shadow: 0 0 30px rgba(0, 195, 255, 0.5); }
+        .easter-egg-content img { max-width: 100%; max-height: 50vh; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 195, 255, 0.3); }
+        .easter-egg-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.3rem; color: #caf0f8; line-height: 1.6; margin: 0; }
+        .easter-egg-text span { color: #00c3ff; font-weight: 600; }
+        .close-egg { position: absolute; top: 10px; right: 20px; font-size: 2rem; color: #e0e1dd; cursor: pointer; transition: color 0.3s; }
+        .close-egg:hover { color: #00c3ff; }
+
+        /* Animaciones */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="header">
+        <h1 id="easterEggTrigger">Una carta para ti</h1>
+        <p>Con todo mi corazón...</p>
+    </div>
+
+    <div class="envelope-wrapper" id="envelopeBtn">
+        <div class="flap"></div>
+        <div class="wax-seal"></div>
+        
+        <div class="letter">
+            <p>Hola mi niña hermosa,<br><br>
+            Quería hacer algo diferente para recordarte lo mucho que te amo. Eres lo mejor que me ha pasado y prometo siempre sacar mi lado más creativo para sacarte una sonrisa.<br><br>
+            Gracias por existir.</p>
+            <span class="signature">Te amo.</span>
+        </div>
+        
+        <div class="envelope-back"></div>
+    </div>
+
+    <div class="instruction">Toca el sobre para abrirlo</div>
+
+    <a href="index.html" class="back-btn">Volver al inicio</a>
+
+    <div id="easterEggOverlay" class="easter-egg-overlay">
+        <div class="easter-egg-content">
+            <span id="closeEasterEgg" class="close-egg">×</span>
+            <img src="rosa1.gif" alt="Rosa Azul Imposible">
+            <p class="easter-egg-text">yo antes te dije que haria posible lo imposible, ahora te digo que <span>contigo, el 'para siempre' es mi realidad favorita.</span> ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. Fondo de Estrellas
+        const particlesContainer = document.getElementById('particles');
+        for(let i = 0; i < 40; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute'; particle.style.width = (Math.random() * 3 + 1) + 'px'; particle.style.height = particle.style.width; particle.style.background = '#ffffff'; particle.style.borderRadius = '50%'; particle.style.left = Math.random() * 100 + 'vw'; particle.style.top = Math.random() * 100 + 'vh'; particle.style.opacity = Math.random() * 0.5 + 0.1; particle.style.animation = `twinkle ${Math.random() * 4 + 2}s infinite alternate ease-in-out`; particlesContainer.appendChild(particle);
+        }
+        const style = document.createElement('style'); style.innerHTML = `@keyframes twinkle { 0% { transform: scale(0.8); opacity: 0.1; } 100% { transform: scale(1.5); opacity: 0.8; } }`; document.head.appendChild(style);
+
+        // 2. Lógica para ABRIR/CERRAR el sobre
+        const envelope = document.getElementById('envelopeBtn');
+        envelope.addEventListener('click', () => {
+            // "toggle" agrega la clase 'open' si no la tiene, y se la quita si ya la tiene
+            envelope.classList.toggle('open');
+        });
+
+        // 3. LÓGICA DEL EASTER EGG
+        const eeTrigger = document.getElementById('easterEggTrigger'); 
+        const eeOverlay = document.getElementById('easterEggOverlay'); 
+        const eeClose = document.getElementById('closeEasterEgg');
+        
+        eeTrigger.addEventListener('click', () => { eeOverlay.classList.add('active'); }); 
+        eeClose.addEventListener('click', () => { eeOverlay.classList.remove('active'); }); 
+        eeOverlay.addEventListener('click', (e) => { if (e.target === eeOverlay) { eeOverlay.classList.remove('active'); } });
+    </script>
+</body>
+</html>

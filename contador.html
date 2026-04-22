@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestro Tiempo - Para Naara</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,600&display=swap');
+
+        body {
+            margin: 0; padding: 0;
+            background-color: #0b132b; 
+            color: #e0e1dd;
+            font-family: 'Playfair Display', serif;
+            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            position: relative; overflow: hidden;
+        }
+
+        /* Fondo de estrellas */
+        .particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            animation: fadeIn 2s ease forwards;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            cursor: help; /* Gatillo del Easter Egg */
+        }
+
+        .header p {
+            font-style: italic;
+            color: #f4d06f; 
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+
+        /* Corazón central */
+        .pulsing-heart {
+            font-size: 3rem;
+            color: #ff4d4d;
+            margin-bottom: 30px;
+            animation: pulse 1s infinite alternate;
+        }
+
+        /* Cuadrícula del Contador */
+        .counter-grid {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .time-box {
+            background: rgba(224, 225, 221, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(224, 225, 221, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 100px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .time-box span {
+            display: block;
+        }
+
+        .numbers {
+            font-size: 3rem;
+            font-weight: 600;
+            font-family: 'Arial', sans-serif; /* Fuente más sólida para los números */
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #70a9a1;
+        }
+
+        /* Botón de Regresar */
+        .back-btn {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 10px 25px; background: rgba(224, 225, 221, 0.1); border: 1px solid #e0e1dd;
+            color: #e0e1dd; border-radius: 20px; text-decoration: none; font-family: 'Arial', sans-serif;
+            text-transform: uppercase; letter-spacing: 1px; z-index: 30; transition: all 0.3s ease; font-size: 0.8rem;
+        }
+        .back-btn:hover { background: #e0e1dd; color: #0b132b; }
+
+        /* --- ESTILOS DEL EASTER EGG --- */
+        .easter-egg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 5, 20, 0.98); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .easter-egg-overlay.active { opacity: 1; pointer-events: all; }
+        .easter-egg-content { text-align: center; max-width: 80%; position: relative; background: rgba(11, 19, 43, 0.6); padding: 30px; border-radius: 20px; border: 2px solid #00c3ff; box-shadow: 0 0 30px rgba(0, 195, 255, 0.5); }
+        .easter-egg-content img { max-width: 100%; max-height: 50vh; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 195, 255, 0.3); }
+        .easter-egg-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.3rem; color: #caf0f8; line-height: 1.6; margin: 0; }
+        .easter-egg-text span { color: #00c3ff; font-weight: 600; }
+        .close-egg { position: absolute; top: 10px; right: 20px; font-size: 2rem; color: #e0e1dd; cursor: pointer; transition: color 0.3s; }
+        .close-egg:hover { color: #00c3ff; }
+
+        /* Animaciones */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 77, 77, 0.5)); } 100% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255, 77, 77, 1)); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1 id="easterEggTrigger">Nuestro Tiempo Juntos</h1>
+            <p>Cada segundo a tu lado es mi favorito</p>
+        </div>
+
+        <div class="pulsing-heart">❤️</div>
+
+        <div class="counter-grid">
+            <div class="time-box">
+                <span class="numbers" id="days">00</span>
+                <span class="label">Días</span>
+            </div>
+            <div class="time-box">
+                <span class="numbers" id="hours">00</span>
+                <span class="label">Horas</span>
+            </div>
+            <div class="time-box">
+                <span class="numbers" id="minutes">00</span>
+                <span class="label">Minutos</span>
+            </div>
+            <div class="time-box">
+                <span class="numbers" id="seconds">00</span>
+                <span class="label">Segundos</span>
+            </div>
+        </div>
+    </div>
+
+    <a href="index.html" class="back-btn">Volver al inicio</a>
+
+    <div id="easterEggOverlay" class="easter-egg-overlay">
+        <div class="easter-egg-content">
+            <span id="closeEasterEgg" class="close-egg">×</span>
+            <img src="rosa1.gif" alt="Rosa Azul Imposible">
+            <p class="easter-egg-text">yo antes te dije que haria posible lo imposible, ahora te digo que <span>contigo, el 'para siempre' es mi realidad favorita.</span> ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. Fondo de Estrellas
+        const particlesContainer = document.getElementById('particles');
+        for(let i = 0; i < 40; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute'; particle.style.width = (Math.random() * 3 + 1) + 'px'; particle.style.height = particle.style.width; particle.style.background = '#ffffff'; particle.style.borderRadius = '50%'; particle.style.left = Math.random() * 100 + 'vw'; particle.style.top = Math.random() * 100 + 'vh'; particle.style.opacity = Math.random() * 0.5 + 0.1; particle.style.animation = `twinkle ${Math.random() * 4 + 2}s infinite alternate ease-in-out`; particlesContainer.appendChild(particle);
+        }
+        const style = document.createElement('style'); style.innerHTML = `@keyframes twinkle { 0% { transform: scale(0.8); opacity: 0.1; } 100% { transform: scale(1.5); opacity: 0.8; } }`; document.head.appendChild(style);
+
+        // ==========================================
+        // 2. LÓGICA DEL CONTADOR
+        // CAMBIA EL AÑO AQUÍ (ej. February 14, 2023 o 2024 o 2025)
+        // ==========================================
+        const startDate = new Date("February 14, 2024 00:00:00").getTime();
+
+        const updateTimer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = now - startDate;
+
+            // Cálculos matemáticos para el tiempo
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Formatear con ceros a la izquierda si es menor a 10
+            document.getElementById("days").innerText = days;
+            document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
+            document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+
+        }, 1000); // Se actualiza cada segundo (1000 ms)
+
+        // 3. LÓGICA DEL EASTER EGG
+        const eeTrigger = document.getElementById('easterEggTrigger'); 
+        const eeOverlay = document.getElementById('easterEggOverlay'); 
+        const eeClose = document.getElementById('closeEasterEgg');
+        
+        eeTrigger.addEventListener('click', () => { eeOverlay.classList.add('active'); }); 
+        eeClose.addEventListener('click', () => { eeOverlay.classList.remove('active'); }); 
+        eeOverlay.addEventListener('click', (e) => { if (e.target === eeOverlay) { eeOverlay.classList.remove('active'); } });
+    </script>
+</body>
+</html>

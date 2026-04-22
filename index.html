@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Naara</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b132b; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            z-index: 10;
+        }
+
+        .message {
+            font-size: 2.2rem;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 2s ease forwards 3.5s;
+            letter-spacing: 1px;
+            line-height: 1.4;
+            cursor: help; 
+        }
+
+        .message span {
+            color: #e0e1dd; 
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        svg {
+            width: 300px;
+            height: 350px;
+            filter: drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.15));
+        }
+
+        .path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 3s ease-in-out forwards 0.5s;
+        }
+
+        .petal {
+            fill: transparent;
+            animation: fillPetal 2s ease forwards 3s;
+        }
+
+        .stem {
+            animation: draw 2s ease-in-out forwards 0.5s;
+        }
+
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes fillPetal {
+            to { 
+                fill: rgba(255, 255, 255, 0.95); 
+                stroke: rgba(255, 255, 255, 1);
+                filter: drop-shadow(0px 0px 10px rgba(255,255,255,0.4));
+            }
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .heart-btn {
+            margin-top: 20px;
+            cursor: pointer;
+            text-align: center;
+            opacity: 0; 
+            animation: fadeUp 2s ease forwards 5s; 
+            transition: transform 0.2s;
+        }
+
+        .heart-icon {
+            font-size: 2.5rem;
+            color: #ff4d4d;
+            animation: pulse 1.5s infinite;
+            display: inline-block;
+        }
+
+        .heart-text {
+            font-family: 'Arial', sans-serif;
+            font-size: 0.9rem;
+            color: #e0e1dd;
+            margin-top: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .heart-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* ---------------- OVERLAYS GLOBALES ---------------- */
+        .overlay-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* CORRECCIÓN: Color 100% sólido para ocultar el fondo y evitar empalmes */
+            background-color: #0b132b; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        .overlay-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ---------------- PANTALLA 1: GIF Y POEMA ---------------- */
+        .poem {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #e0e1dd;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 1s ease 0.5s; 
+            width: 100%; /* Asegura que tome el ancho necesario para centrarse bien */
+        }
+
+        .overlay-screen.active .poem {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .poem span {
+            color: #f4d06f; 
+            font-style: italic;
+        }
+
+        /* CORRECCIÓN: Contenedor del GIF para centrado absoluto */
+        .gif-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gif-container img {
+            max-width: 80%;
+            max-height: 40vh;
+            border-radius: 15px;
+            box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.1);
+            transform: scale(0.9);
+            transition: transform 0.8s ease;
+            /* CORRECCIÓN: Centrado forzado de la imagen */
+            display: block;
+            margin: 0 auto; 
+        }
+
+        .overlay-screen.active .gif-container img {
+            transform: scale(1);
+        }
+
+        .action-btn {
+            margin-top: 40px;
+            padding: 12px 30px;
+            background-color: transparent;
+            border: 1px solid #e0e1dd;
+            color: #e0e1dd;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            background-color: #e0e1dd;
+            color: #0b132b;
+            box-shadow: 0px 0px 15px rgba(224, 225, 221, 0.5);
+        }
+
+        /* ---------------- PANTALLA 2: OPCIONES ---------------- */
+        .options-title {
+            font-size: 2rem;
+            margin-bottom: 40px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .options-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* ---------------- ESTILOS DEL EASTER EGG (Rosa Azul) ---------------- */
+        .easter-egg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 5, 20, 0.98); 
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .easter-egg-overlay.active { opacity: 1; pointer-events: all; }
+
+        .easter-egg-content {
+            text-align: center; max-width: 80%; position: relative;
+            background: rgba(11, 19, 43, 0.6); padding: 30px;
+            border-radius: 20px; border: 2px solid #00c3ff; 
+            box-shadow: 0 0 30px rgba(0, 195, 255, 0.5);
+        }
+
+        .easter-egg-content img { max-width: 100%; max-height: 50vh; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 195, 255, 0.3); }
+
+        .easter-egg-text {
+            font-family: 'Playfair Display', serif; font-style: italic;
+            font-size: 1.3rem; color: #caf0f8; 
+            line-height: 1.6; margin: 0;
+        }
+
+        .easter-egg-text span { color: #00c3ff; font-weight: 600; }
+
+        .close-egg { position: absolute; top: 10px; right: 20px; font-size: 2rem; color: #e0e1dd; cursor: pointer; transition: color 0.3s; }
+        .close-egg:hover { color: #00c3ff; }
+
+    </style>
+</head>
+<body>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+            <path class="path stem" d="M100 300 C105 250, 95 200, 100 150" stroke="#70a9a1" stroke-width="3" fill="none"/>
+            <path class="path" d="M100 240 C70 230, 60 260, 100 280" stroke="#70a9a1" stroke-width="2" fill="none"/>
+            <path class="path" d="M100 220 C130 210, 140 240, 100 260" stroke="#70a9a1" stroke-width="2" fill="none"/>
+            <path class="path petal" d="M100 150 C80 100, 40 70, 100 30 C160 70, 120 100, 100 150" stroke="#ffffff" stroke-width="2"/>
+            <path class="path petal" d="M100 150 C60 130, 10 150, 30 90 C60 100, 80 120, 100 150" stroke="#ffffff" stroke-width="2"/>
+            <path class="path petal" d="M100 150 C140 130, 190 150, 170 90 C140 100, 120 120, 100 150" stroke="#ffffff" stroke-width="2"/>
+            <path class="path petal" d="M100 150 C70 170, 30 190, 20 140 C50 150, 80 160, 100 150" stroke="#ffffff" stroke-width="2"/>
+            <path class="path petal" d="M100 150 C130 170, 170 190, 180 140 C150 150, 120 160, 100 150" stroke="#ffffff" stroke-width="2"/>
+            <path class="path" d="M100 150 C95 120, 105 90, 100 70" stroke="#f4d06f" stroke-width="2" fill="none"/>
+            <path class="path" d="M100 150 C85 130, 90 100, 85 85" stroke="#f4d06f" stroke-width="1.5" fill="none"/>
+            <path class="path" d="M100 150 C115 130, 110 100, 115 85" stroke="#f4d06f" stroke-width="1.5" fill="none"/>
+        </svg>
+
+        <div class="message" id="easterEggTrigger">
+            Unos lirios para <span>Naara</span>,<br>la niña más linda.
+        </div>
+
+        <div class="heart-btn" id="openGifBtn">
+            <div class="heart-icon">❤️</div>
+            <div class="heart-text">Tócame</div>
+        </div>
+    </div>
+
+    <div class="overlay-screen" id="poemOverlay">
+        <div class="poem">
+            Me pierdo en la magia de tu mirada,<br>
+            en esos <span>ojos color miel</span> que me dan calma.<br>
+            El refugio perfecto donde quiero estar,<br>
+            la luz dorada que me enseñó a amar.
+        </div>
+        <div class="gif-container">
+            <img src="amor1.gif" alt="GIF de amor">
+        </div>
+        <button class="action-btn" id="continueBtn">Siguiente</button>
+    </div>
+
+    <div class="overlay-screen" id="choicesOverlay">
+        <div class="options-title">¿Qué quieres ver ahora?</div>
+        <div class="options-grid">
+            <a href="flores.html" class="action-btn">Campo de flores</a>
+            <a href="album.html" class="action-btn">Nuestro álbum</a>
+            <a href="juego.html" class="action-btn">Trivia de novios</a>
+            <a href="contador.html" class="action-btn">Nuestro Tiempo</a>
+            <a href="carta.html" class="action-btn">Una Carta para ti</a>
+            <a href="razones.html" class="action-btn">Por qué te amo</a>
+        </div>
+    </div>
+
+    <div id="easterEggOverlay" class="easter-egg-overlay">
+        <div class="easter-egg-content">
+            <span id="closeEasterEgg" class="close-egg">×</span>
+            <img src="rosa1.gif" alt="Rosa Azul Imposible">
+            <p class="easter-egg-text">yo antes te dije que haria posible lo imposible, ahora te digo que <span>contigo, el 'para siempre' es mi realidad favorita.</span> ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. Lógica de partículas
+        const particlesContainer = document.getElementById('particles');
+        for(let i = 0; i < 40; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = (Math.random() * 3 + 1) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.background = '#ffffff';
+            particle.style.borderRadius = '50%';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.top = Math.random() * 100 + 'vh';
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            particle.style.boxShadow = '0 0 8px #ffffff';
+            particle.style.animation = `twinkle ${Math.random() * 4 + 2}s infinite alternate ease-in-out`;
+            particlesContainer.appendChild(particle);
+        }
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes twinkle { 0% { transform: scale(0.8); opacity: 0.1; } 100% { transform: scale(1.5); opacity: 0.8; } }`;
+        document.head.appendChild(style);
+
+        // 2. Lógica de navegación entre pantallas principales
+        const openGifBtn = document.getElementById('openGifBtn');
+        const poemOverlay = document.getElementById('poemOverlay');
+        const continueBtn = document.getElementById('continueBtn');
+        const choicesOverlay = document.getElementById('choicesOverlay');
+
+        openGifBtn.addEventListener('click', () => {
+            poemOverlay.classList.add('active');
+        });
+
+        continueBtn.addEventListener('click', () => {
+            poemOverlay.classList.remove('active');
+            setTimeout(() => {
+                choicesOverlay.classList.add('active');
+            }, 800); 
+        });
+
+        // 3. LÓGICA DEL EASTER EGG
+        const eeTrigger = document.getElementById('easterEggTrigger'); 
+        const eeOverlay = document.getElementById('easterEggOverlay'); 
+        const eeClose = document.getElementById('closeEasterEgg');
+        
+        eeTrigger.addEventListener('click', () => { 
+            eeOverlay.classList.add('active'); 
+        }); 
+        
+        eeClose.addEventListener('click', () => { 
+            eeOverlay.classList.remove('active'); 
+        }); 
+        
+        eeOverlay.addEventListener('click', (e) => { 
+            if (e.target === eeOverlay) { 
+                eeOverlay.classList.remove('active'); 
+            } 
+        });
+    </script>
+</body>
+</html>

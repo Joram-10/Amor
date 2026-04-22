@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campo de Flores - Para Naara</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b132b; 
+            color: #e0e1dd; 
+            font-family: 'Playfair Display', serif;
+            overflow: hidden; 
+            position: relative;
+            height: 100vh;
+        }
+
+        /* 1. Fondo de Estrellas */
+        .particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 2. Resplandor que "palpita" con el ritmo de la música */
+        .ambient-glow {
+            position: absolute;
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 60vh;
+            background: radial-gradient(circle at 50% 100%, rgba(255, 126, 179, 0.15), transparent 70%);
+            z-index: 2;
+            pointer-events: none;
+            animation: pulseGlow 4s infinite alternate ease-in-out;
+        }
+
+        /* 3. Reproductor de Spotify */
+        .music-container {
+            position: absolute;
+            top: 50px;
+            width: 100%;
+            text-align: center;
+            z-index: 20;
+            animation: fadeIn 2s ease forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .music-text {
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            font-style: italic;
+            color: #ff9a9e;
+            cursor: help; /* Cursor para indicar que es el Easter Egg */
+        }
+
+        .music-text span {
+            color: #e0e1dd;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* 4. Campo de Lirios */
+        .field {
+            position: absolute;
+            bottom: -20px;
+            width: 100%;
+            height: 40vh; 
+            z-index: 10;
+        }
+
+        .mini-flower {
+            position: absolute;
+            bottom: 0;
+            transform-origin: bottom center;
+            animation: growFlower 2.5s ease-out forwards;
+            opacity: 0; 
+        }
+
+        .mini-stem {
+            width: 3px;
+            background: linear-gradient(to top, #2e7d32, #70a9a1);
+            border-radius: 2px;
+            margin: 0 auto;
+        }
+
+        .mini-petal-container {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            left: -18px; 
+        }
+
+        .mini-petal {
+            position: absolute;
+            width: 12px;
+            height: 35px;
+            background: linear-gradient(to top, #ff7eb3, #ffb6c1);
+            border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+            box-shadow: 0 0 10px rgba(255, 126, 179, 0.4);
+            top: 5px;
+            left: 14px;
+            transform-origin: bottom center;
+        }
+
+        .mini-center {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #f4d06f;
+            border-radius: 50%;
+            top: 25px;
+            left: 17px;
+            z-index: 2;
+            box-shadow: 0 0 5px #f4d06f;
+        }
+
+        /* 5. Corazones Flotantes */
+        .floating-heart {
+            position: absolute;
+            color: #ff9a9e; 
+            font-size: 1.2rem;
+            opacity: 0;
+            z-index: 5;
+            pointer-events: none;
+            animation: floatUp linear infinite;
+        }
+
+        /* Botón de Regreso */
+        .back-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 25px;
+            background-color: rgba(224, 225, 221, 0.1);
+            border: 1px solid #e0e1dd;
+            color: #e0e1dd;
+            border-radius: 20px;
+            text-decoration: none;
+            font-family: 'Arial', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 30;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .back-btn:hover {
+            background-color: #ff9a9e;
+            color: #0b132b;
+            border-color: #ff9a9e;
+            box-shadow: 0 0 15px rgba(255, 154, 158, 0.5);
+        }
+
+        /* --- ESTILOS DEL EASTER EGG --- */
+        .easter-egg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 5, 20, 0.98); 
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .easter-egg-overlay.active { opacity: 1; pointer-events: all; }
+
+        .easter-egg-content {
+            text-align: center; max-width: 80%; position: relative;
+            background: rgba(11, 19, 43, 0.6); padding: 30px;
+            border-radius: 20px; border: 2px solid #00c3ff; 
+            box-shadow: 0 0 30px rgba(0, 195, 255, 0.5);
+        }
+
+        .easter-egg-content img { max-width: 100%; max-height: 50vh; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 195, 255, 0.3); }
+
+        .easter-egg-text {
+            font-family: 'Playfair Display', serif; font-style: italic;
+            font-size: 1.3rem; color: #caf0f8; 
+            line-height: 1.6; margin: 0;
+        }
+
+        .easter-egg-text span { color: #00c3ff; font-weight: 600; }
+
+        .close-egg { position: absolute; top: 10px; right: 20px; font-size: 2rem; color: #e0e1dd; cursor: pointer; transition: color 0.3s; }
+        .close-egg:hover { color: #00c3ff; }
+
+        /* ANIMACIONES */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes growFlower {
+            0% { transform: scale(0) rotate(var(--rotation)); opacity: 0; }
+            100% { transform: scale(var(--final-scale)) rotate(var(--rotation)); opacity: 0.9; }
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        @keyframes floatUp {
+            0% { 
+                bottom: -10%; 
+                opacity: 0; 
+                transform: translateX(0) scale(0.5); 
+            }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.6; }
+            100% { 
+                bottom: 110%; 
+                opacity: 0; 
+                transform: translateX(var(--drift)) scale(1.2); 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="particles" id="particles"></div>
+    
+    <div class="ambient-glow"></div>
+
+    <div class="music-container">
+        <div class="music-text" id="easterEggTrigger">
+            Nuestra canción
+            <span>Are You Bored Yet? - Wallows ft. Clairo</span>
+        </div>
+        <iframe style="border-radius:12px; margin-top: 10px;" 
+            src="https://open.spotify.com/embed/track/57RA3JGafJm5zRtKJiKPIm?utm_source=generator&theme=0" 
+            width="320" 
+            height="80" 
+            frameBorder="0" 
+            allowfullscreen="" 
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+            loading="lazy">
+        </iframe>
+    </div>
+
+    <div class="field" id="flowerField"></div>
+
+    <a href="index.html" class="back-btn">Volver</a>
+
+    <div id="easterEggOverlay" class="easter-egg-overlay">
+        <div class="easter-egg-content">
+            <span id="closeEasterEgg" class="close-egg">×</span>
+            <img src="rosa1.gif" alt="Rosa Azul Imposible">
+            <p class="easter-egg-text">yo antes te dije que haria posible lo imposible, ahora te digo que <span>contigo, el 'para siempre' es mi realidad favorita.</span> ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. Estrellas del fondo
+        const particlesContainer = document.getElementById('particles');
+        for(let i = 0; i < 40; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = (Math.random() * 3 + 1) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.background = '#ffffff';
+            particle.style.borderRadius = '50%';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.top = Math.random() * 100 + 'vh';
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            particle.style.animation = `twinkle ${Math.random() * 4 + 2}s infinite alternate ease-in-out`;
+            particlesContainer.appendChild(particle);
+        }
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes twinkle { 0% { transform: scale(0.8); opacity: 0.1; } 100% { transform: scale(1.5); opacity: 0.8; } }`;
+        document.head.appendChild(style);
+
+        // 2. Lirios Rosas
+        const field = document.getElementById('flowerField');
+        const numberOfFlowers = 35; 
+
+        for(let i = 0; i < numberOfFlowers; i++) {
+            createFlower();
+        }
+
+        function createFlower() {
+            const flowerWrapper = document.createElement('div');
+            flowerWrapper.className = 'mini-flower';
+            const leftPos = Math.random() * 100;
+            flowerWrapper.style.left = `${leftPos}%`;
+            flowerWrapper.style.zIndex = Math.floor(Math.random() * 10);
+            
+            const rotation = (Math.random() * 40) - 20; 
+            const scale = (Math.random() * 0.7) + 0.5; 
+            flowerWrapper.style.setProperty('--rotation', `${rotation}deg`);
+            flowerWrapper.style.setProperty('--final-scale', scale);
+            
+            const delay = Math.random() * 3;
+            flowerWrapper.style.animationDelay = `${delay}s`;
+
+            const stemHeight = Math.floor(Math.random() * 100) + 70; 
+
+            flowerWrapper.innerHTML = `
+                <div class="mini-petal-container" style="bottom: ${stemHeight - 15}px; position: absolute;">
+                    <div class="mini-petal" style="transform: rotate(0deg) translateY(-15px);"></div>
+                    <div class="mini-petal" style="transform: rotate(60deg) translateY(-15px);"></div>
+                    <div class="mini-petal" style="transform: rotate(120deg) translateY(-15px);"></div>
+                    <div class="mini-petal" style="transform: rotate(180deg) translateY(-15px);"></div>
+                    <div class="mini-petal" style="transform: rotate(240deg) translateY(-15px);"></div>
+                    <div class="mini-petal" style="transform: rotate(300deg) translateY(-15px);"></div>
+                    <div class="mini-center"></div>
+                </div>
+                <div class="mini-stem" style="height: ${stemHeight}px;"></div>
+            `;
+
+            field.appendChild(flowerWrapper);
+        }
+
+        // 3. Corazones Flotantes
+        const heartCount = 15; 
+        for(let i = 0; i < heartCount; i++) {
+            createHeart();
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.innerHTML = '❤️'; 
+            
+            heart.style.left = `${Math.random() * 100}vw`;
+            
+            const size = (Math.random() * 1) + 0.5;
+            heart.style.fontSize = `${size}rem`;
+            
+            const duration = (Math.random() * 7) + 8;
+            heart.style.animationDuration = `${duration}s`;
+            
+            const delay = Math.random() * 10;
+            heart.style.animationDelay = `${delay}s`;
+            
+            const drift = (Math.random() * 100) - 50; 
+            heart.style.setProperty('--drift', `${drift}px`);
+
+            document.body.appendChild(heart);
+        }
+
+        // 4. LÓGICA DEL EASTER EGG
+        const eeTrigger = document.getElementById('easterEggTrigger'); 
+        const eeOverlay = document.getElementById('easterEggOverlay'); 
+        const eeClose = document.getElementById('closeEasterEgg');
+        
+        eeTrigger.addEventListener('click', () => { 
+            eeOverlay.classList.add('active'); 
+        }); 
+        
+        eeClose.addEventListener('click', () => { 
+            eeOverlay.classList.remove('active'); 
+        }); 
+        
+        eeOverlay.addEventListener('click', (e) => { 
+            if (e.target === eeOverlay) { 
+                eeOverlay.classList.remove('active'); 
+            } 
+        });
+    </script>
+</body>
+</html>
